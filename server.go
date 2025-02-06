@@ -1,58 +1,29 @@
 package main
 
 import (
-	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/99designs/gqlgen/graphql/handler/extension"
-	"github.com/99designs/gqlgen/graphql/handler/lru"
-	"github.com/99designs/gqlgen/graphql/handler/transport"
-	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/vektah/gqlparser/v2/ast"
+	"github.com/gin-gonic/gin"
 	"go-graph-api/db"
-	"go-graph-api/graph"
+	"go-graph-api/routes"
 	"log"
-	"net/http"
-	"os"
-)
-
-const (
-	defaultPort = "8080"
-	// Hardcoded Neo4j credentials (modify as needed)
-	neo4jURI      = "neo4j://100.100.20.30:7687"
-	neo4jUser     = "neo4j"
-	neo4jPassword = "abc123xxx"
 )
 
 func main() {
 
-	// Initialize Neo4j connection with hardcoded credentials
-	err := db.InitializeNeo4j(neo4jURI, neo4jUser, neo4jPassword)
+	// Initialize Neo4j connection
+	err := db.InitDB()
+
 	if err != nil {
 		log.Fatalf("Database initialization error: %v", err)
 	}
-	defer db.CloseNeo4j() // Ensure connection closes on exit
+	// close on exit
+	defer db.CloseDB()
 
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = defaultPort
-	}
+	// Start Server
+	server := gin.Default()
+	// Register all Routes with the Server
+	routes.RegisterRoutes(server)
+	log.Printf("🚀 connect to http://localhost:%d/api for GraphQL API", 8010)
+	log.Printf("🚀 connect to http://localhost:%d/play for GraphQL Playground", 8010)
+	server.Run(":8010")
 
-	// Initialize GraphQL
-	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
-
-	srv.AddTransport(transport.Options{})
-	srv.AddTransport(transport.GET{})
-	srv.AddTransport(transport.POST{})
-
-	srv.SetQueryCache(lru.New[*ast.QueryDocument](1000))
-
-	srv.Use(extension.Introspection{})
-	srv.Use(extension.AutomaticPersistedQuery{
-		Cache: lru.New[string](100),
-	})
-
-	http.Handle("/", playground.Handler("GraphQL Subscriptions", "/query"))
-	http.Handle("/query", srv)
-
-	log.Printf("🚀 connect to http://localhost:%s/ for GraphQL Subscriptions", port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
 }

@@ -14,11 +14,18 @@ var (
 	once   sync.Once
 )
 
-// InitializeNeo4j sets up the Neo4j connection
-func InitializeNeo4j(uri, username, password string) error {
+const (
+	// Hardcoded Neo4j credentials (modify as needed)
+	neo4jURI      = "neo4j://100.100.20.30:7687"
+	neo4jUser     = "neo4j"
+	neo4jPassword = "abc123xxx"
+)
+
+// InitDB sets up the Neo4j connection
+func InitDB() error {
 	var err error
 	once.Do(func() {
-		driver, err = neo4j.NewDriverWithContext(uri, neo4j.BasicAuth(username, password, ""))
+		driver, err = neo4j.NewDriverWithContext(neo4jURI, neo4j.BasicAuth(neo4jUser, neo4jPassword, ""))
 		if err != nil {
 			log.Fatalf("Failed to connect to Neo4j: %v", err)
 		}
@@ -26,6 +33,8 @@ func InitializeNeo4j(uri, username, password string) error {
 
 	// Verify the connection
 	ctx := context.Background()
+
+	// error handling
 	if err = driver.VerifyConnectivity(ctx); err != nil {
 		return fmt.Errorf("neo4j connectivity error: %v", err)
 	}
@@ -34,13 +43,13 @@ func InitializeNeo4j(uri, username, password string) error {
 	return nil
 }
 
-// GetDriver returns the Neo4j driver instance
-func GetDriver() neo4j.DriverWithContext {
+// GetDBConnection returns the Neo4j driver instance
+func GetDBConnection() neo4j.DriverWithContext {
 	return driver
 }
 
-// CloseNeo4j closes the database connection
-func CloseNeo4j() {
+// CloseDB closes the database connection
+func CloseDB() {
 	if driver != nil {
 		_ = driver.Close(context.Background())
 		log.Println("Closed Neo4j connection")
