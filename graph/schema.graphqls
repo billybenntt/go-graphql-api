@@ -1,0 +1,34 @@
+# GraphQL schema example
+# Based on gqlgen's getting started guide
+# Defines types, queries, and mutations for managing  items.
+
+# Represents an item
+type Todo {
+    id: ID!         # Unique identifier for the item
+    text: String!   # The content of the Item item
+    done: Boolean!  # Status indicating if the Item is completed
+    user: User!     # The user who created the Item
+    email: String!  # Email of the user who created the Item
+}
+
+# Represents a User
+type User {
+    id: ID!     # Unique identifier for the User
+    name: String!  # Name of the User
+}
+
+# Input type for creating a new Item
+input NewTodo {
+    text: String!   # The text content of the Item
+    userId: String! # The ID of the user creating the Item
+}
+
+# Query type for fetching data
+type Query {
+    todos: [Todo!]! # Retrieves a list of all Todos
+}
+
+# Mutation type for modifying data
+type Mutation {
+    createTodo(input: NewTodo!): Todo! # Creates a new  item
+}
