@@ -23,12 +23,16 @@ input NewTodo {
     userId: String! # The ID of the user creating the Item
 }
 
+"""
 # Query type for fetching data
+"""
 type Query {
-    todos: [Todo!]! # Retrieves a list of all Todos
+    """Retrieves a list of all Todos"""
+    todos: [Todo!]!
 }
 
 # Mutation type for modifying data
 type Mutation {
+    """Creates a new item"""
     createTodo(input: NewTodo!): Todo! # Creates a new  item
 }

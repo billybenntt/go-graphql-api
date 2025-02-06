@@ -10,6 +10,7 @@ type NewTodo struct {
 	UserID string `json:"userId"`
 }
 
+// # Query type for fetching data
 type Query struct {
 }
 
